@@ -74,6 +74,7 @@ public class Main extends Application {
 	ObservableList<String> availableTopics; // List containing the topics currently in the database
     boolean done = false; // Set to true when question is answered
     Iterator<Question> currIter; // Holds the iterator for the current quiz being taken
+    Scene dashboardScene; // Global reference to the main dashboard
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -618,7 +619,7 @@ public class Main extends Application {
 			root.setBackground(background);
 
 			// Create scene and display
-			Scene dashboardScene = new Scene(root,800,400);
+			dashboardScene = new Scene(root,800,400);
 			dashboardScene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(dashboardScene);
 			primaryStage.show();
@@ -678,7 +679,12 @@ public class Main extends Application {
 				new EventHandler<MouseEvent>() {
 					@Override
 					public void handle(MouseEvent event) {
-						//showQuiz()
+						if (currIter.hasNext()) {
+							showQuiz(primaryStage, questionNumber + 1);
+						} else {
+							
+						}
+						
 					}
 				});
 					
@@ -696,6 +702,10 @@ public class Main extends Application {
 		Scene questionScene = new Scene(questionPane,800,600);
 		questionScene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 		primaryStage.setScene(questionScene);
+		
+	}
+	
+	private void endQuiz(Stage primaryStage) {
 		
 	}
 
