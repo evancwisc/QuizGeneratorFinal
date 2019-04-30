@@ -2,6 +2,7 @@ package application;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -10,7 +11,7 @@ import java.util.Set;
 import org.json.simple.parser.ParseException;
 
 import javafx.application.Application;
-
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -20,6 +21,7 @@ import javafx.geometry.Pos;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -84,7 +86,8 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
       // Set title
       primaryStage.setTitle("Quiz Generator: A-Team 29");
-  
+      primaryStage.setOnCloseRequest(confirmCloseEventHandler);
+      
       try {
         // Create main title label
         Label topTitle = new Label("Quiz Generator");
@@ -186,7 +189,7 @@ public class Main extends Application {
             int questionNumber = 1;
   
             // Show the quiz on the stage
-            showQuiz(primaryStage, questionNumber);
+            showQuiz(primaryStage, questionNumber, myQuiz);
           }
         });
   
@@ -328,7 +331,7 @@ public class Main extends Application {
               }
             });
           }
-  
+          
           // Button for submitting the question
           Button addButton = new Button("Add");
           
@@ -585,25 +588,9 @@ public class Main extends Application {
           saveButton.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-              
-              // Check file name was provided
-              if (filePath.getText().equals("")) {
-                Alert alert = new Alert(AlertType.WARNING, "Please provide a file name");
-                alert.showAndWait().filter(response -> response == ButtonType.OK);
-                return;
-  
-              } else { // attempt to save questions to the specified file
-                try {
-                  questions.save(filePath.getText());
-  
-                } catch (IOException e) {
-                  Alert alert = new Alert(AlertType.ERROR, "Error writing to the file.");
-                  alert.showAndWait().filter(response -> response == ButtonType.OK);
-                  e.printStackTrace();
-                  return;
-                }
-              }
-              saveQuestionsDialog.close();
+		      if(saveQuestionsToFile(filePath.getText())) {
+		    	  saveQuestionsDialog.close();
+		      }
             }
           });
   
@@ -623,11 +610,67 @@ public class Main extends Application {
       });
     }
 	
-	private void showQuiz(Stage primaryStage, int questionNumber) {
+	private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+		// UI Elements
+		Label saveQuestionsLabel = new Label("File name to save questions to:");
+		VBox wrapper = new VBox(20);
+		wrapper.setAlignment(Pos.CENTER);
+		TextField fileLocation = new TextField();
+		VBox.setMargin(fileLocation, new Insets(10));
+		Button save = new Button("Save");
+		Button exitWithoutSaving = new Button("Exit without Saving");
+		wrapper.getChildren().addAll(saveQuestionsLabel, fileLocation, save, exitWithoutSaving);
+		Scene resultScene = new Scene(wrapper, 400, 200);
+		save.setMinWidth(250);
+		exitWithoutSaving.setMinWidth(250);
+		
+		// Setup event handlers 
+		exitWithoutSaving.setOnMouseClicked(e -> Platform.exit());
+		save.setOnMouseClicked(e -> {
+			if(saveQuestionsToFile(fileLocation.getText())) {
+				Platform.exit();
+			}
+		});
+		
+		// Setup stage
+		final Stage saveDialog = new Stage();
+		saveDialog.setTitle("Quit Application");
+		saveDialog.initModality(Modality.APPLICATION_MODAL);
+		saveDialog.initOwner(primaryStage);
+		saveDialog.setScene(resultScene);
+		saveDialog.show();
+		
+		// Prevent the window from closing
+		event.consume();
+    };
+	
+	private boolean saveQuestionsToFile(String filePath) {
+		if (filePath.equals("")) {
+			Alert alert = new Alert(AlertType.WARNING, 
+					"Please provide a file name");
+			alert.showAndWait().filter(
+					response -> response == ButtonType.OK);
+			return false;
+		} else {
+			try {
+				questions.save(filePath);
+
+			} catch (IOException e) {
+				Alert alert = new Alert(AlertType.ERROR, 
+						"Error writing to the file.");
+				alert.showAndWait().filter(
+						response -> response == ButtonType.OK);
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private void showQuiz(Stage primaryStage, int questionNumber, Quiz quiz) {
 		// Create border pane
 		BorderPane questionPane = new BorderPane();
 		Question myQuestion = currIter.next();
-		done = false;
 		
 		// Main question title label
 		Label questionTitle = new Label("Question " + questionNumber);
@@ -637,17 +680,16 @@ public class Main extends Application {
 		// Image 
 		String iFile = myQuestion.getImageFile();
 		ImageView imageView = null;
-		if (!iFile.contentEquals("none")) {
+		File imageFile = new File(iFile);
+		if (imageFile.exists() && !imageFile.isDirectory()) {
 			Image image = new Image(iFile);
 			imageView = new ImageView(image);
 			imageView.setFitHeight(200); 
 			imageView.setFitWidth(200);
-			
 		} else {
 			imageView = new ImageView();
 			imageView.setFitHeight(200); 
 			imageView.setFitWidth(200);
-
 		}
 	    
 	    // Question text label
@@ -668,24 +710,66 @@ public class Main extends Application {
 	    VBox choicesBox = new VBox(10);
 	    choicesBox.getChildren().addAll(buttons);
 
+	    // Submission result text
+	    Label resultLabel = new Label();
+	    Button nextButton = new Button();
+	    Region fillerRegion = new Region();
+	    HBox.setHgrow(fillerRegion, Priority.ALWAYS);
+	    
+	    HBox bottomBox = new HBox(20);
+	    bottomBox.getChildren().addAll(resultLabel, fillerRegion, nextButton);
+	    nextButton.setVisible(false);
+	    resultLabel.setFont(Font.font(40));
+	    
+	    // Go to the next stage
+	    nextButton.setOnMouseClicked(
+	    		new EventHandler<MouseEvent>() {
+	    			@Override
+	    			public void handle(MouseEvent event) {
+	    				// If it has another question goto that question
+	    				if(currIter.hasNext()) {
+	    					showQuiz(primaryStage, questionNumber + 1, quiz);
+	    				} else {
+	    					// Else end the quiz
+	    					endQuiz(primaryStage, quiz, questionNumber);
+	    				}
+	    			}
+	    		});
+	    
 	    // Submit Answer Button
 	    Button submit = new Button("Submit Answer");
 	    submit.setOnMouseClicked(
 				new EventHandler<MouseEvent>() {
 					@Override
 					public void handle(MouseEvent event) {
-						if (currIter.hasNext()) {
-							showQuiz(primaryStage, questionNumber + 1);
+						RadioButton selectedRadioButton = (RadioButton) myToggleGroup.getSelectedToggle();
+						if(selectedRadioButton != null) {
+							// Show results of question submission
+							submit.setDisable(true);
+							if(selectedRadioButton.getText().equals(myQuestion.getCorrectChoice())) {
+								resultLabel.setText("CORRECT");
+								resultLabel.setTextFill(Color.GREEN);
+								quiz.correct();
+							} else {
+								resultLabel.setText("INCORRECT");
+								resultLabel.setTextFill(Color.RED);
+							}
+							// Update next button's properties
+							if(currIter.hasNext()) {
+								nextButton.setText("Next");
+							} else {
+								nextButton.setText("Finish");
+							}
+							nextButton.setVisible(true);
 						} else {
-							
+							showAlert("Please select an answer");
 						}
-						
 					}
 				});
 					
 	    // Set up center box
 	    VBox centerBox2 = new VBox(20);
-	    centerBox2.getChildren().addAll(imageView, textAndLabel, choicesBox, submit);
+	    centerBox2.getChildren().addAll(imageView, textAndLabel, choicesBox, submit, bottomBox);
 	    
 		// Set margins
 		questionPane.setPadding(new Insets(10, 10, 10, 10));
@@ -700,8 +784,65 @@ public class Main extends Application {
 		
 	}
 	
-	private void endQuiz(Stage primaryStage) {
+	private void showAlert(String text) {
+		Alert alert = new Alert(AlertType.WARNING, text);
+		alert.showAndWait().filter(response -> response == ButtonType.OK);
+	}
+	
+	private void endQuiz(Stage primaryStage, Quiz quiz, int questionsAnswered) {
+		BorderPane root = new BorderPane();
 		
+		// Create title
+		Label title = new Label("Quiz Completed");
+		BorderPane.setAlignment(title, Pos.CENTER);
+		BorderPane.setMargin(title, new Insets(10));
+		title.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 40));
+		
+		// Setup quiz score and decimal formatter
+		float score = quiz.score();
+		DecimalFormat df = new DecimalFormat();
+		df.setMaximumFractionDigits(2);
+		
+		// Create results layout
+		VBox results = new VBox(20);
+		Label numberAnswered = new Label("Questions Answered: " + questionsAnswered);
+		numberAnswered.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+		results.setAlignment(Pos.CENTER_LEFT);
+		
+		// Create correct questions layout
+		Label questionsCorrect = new Label("Questions Correct: " + Math.round(quiz.score() * questionsAnswered));
+		questionsCorrect.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+		
+		Label scoreLabel = new Label("Percent Correct: " + df.format(score * 100) + "%");
+		scoreLabel.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+		
+		// Setup return button
+		Button returnButton = new Button("Return to Dashboard");
+		BorderPane.setAlignment(returnButton, Pos.CENTER);
+		BorderPane.setMargin(returnButton, new Insets(25));
+		
+		// Set button to return to dashboard on click
+		returnButton.setOnMouseClicked(
+				new EventHandler<MouseEvent>() {
+					@Override
+					public void handle(MouseEvent event) {
+						primaryStage.setScene(dashboardScene);
+					}
+				});
+		
+		// Set root UI background
+		results.getChildren().addAll(questionsCorrect, numberAnswered, scoreLabel);
+		BackgroundFill backgroundFill = new BackgroundFill(Color.AQUA, CornerRadii.EMPTY, Insets.EMPTY);
+		Background background = new Background(backgroundFill);
+		root.setBackground(background);
+		root.setTop(title);
+		root.setLeft(results);
+		root.setBottom(returnButton);
+		
+		// Create and show scene
+		Scene resultScene = new Scene(root, 800, 400);
+		resultScene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+		primaryStage.setScene(resultScene);
 	}
 
 	/**
