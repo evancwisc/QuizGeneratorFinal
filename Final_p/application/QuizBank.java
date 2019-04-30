@@ -17,7 +17,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 import javafx.collections.ObservableList;
 
 /**
@@ -92,7 +91,8 @@ public class QuizBank implements QuizBankADT {
 	 * @param fileName is the file to save to
 	 * @throws IOException if the file could not be written
 	 */
-	public void save(String filename) throws IOException {
+	@SuppressWarnings("unchecked")
+  public void save(String filename) throws IOException {
 		JSONObject root = new JSONObject();
 		JSONArray questionsArray = new JSONArray();
 		for(String topic : getAllTopics()) {
@@ -148,9 +148,8 @@ public class QuizBank implements QuizBankADT {
 					correctChoice = choice;
 				}
 			}
-			String[] choiceArray = new String[choices.size()];
-			choiceArray = choices.toArray(choiceArray);
-			addQuestion(new Question(questionText, image, topic, choiceArray, correctChoice));
+			addQuestion(new Question(questionText, image, topic, choices, correctChoice));
+			numQuestions++;
 		}
 	}
 
@@ -163,7 +162,7 @@ public class QuizBank implements QuizBankADT {
 	 * @param choices are the question choices
 	 * @param correctChoice is the correct choice to the question
 	 */
-	public void add(String questionText, String imageFile, String topic, String[] choices, String correctChoice) {
+	public void add(String questionText, String imageFile, String topic, ArrayList<String> choices, String correctChoice) {
 		addQuestion(new Question(questionText, imageFile, topic, choices, correctChoice));
 	}
 

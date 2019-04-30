@@ -2,10 +2,10 @@ package application;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Set;
 
 import org.json.simple.parser.ParseException;
-
 import javafx.collections.ObservableList;
 
 /**
@@ -52,7 +52,7 @@ public interface QuizBankADT {
    * @param choices are the question choices
    * @param correctChoice is the correct choice to the question
    */
-  void add(String questionText, String imageFile, String topic, String[] choices, String correctChoice);
+  void add(String questionText, String imageFile, String topic, ArrayList<String> choices, String correctChoice);
   
   /**
    * @returns all available topics
