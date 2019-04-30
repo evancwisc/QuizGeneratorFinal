@@ -1,3 +1,17 @@
+///////////////////////////////////////////////////////////////////////////////
+//ALL STUDENTS COMPLETE THESE SECTIONS
+//Title:            Team Project
+//Files:            Main.java
+//Semester:         CS 400, Spring 2019
+//Due:              May 2, 10:00 pm
+//
+//Authors:           Evan Corden, Robin Stauffer, Ryan Hemmila
+//Emails:            corden@wisc.edu, rstauffer@isc.edu, rhemmila@wisc.edu
+//Lecturer's Name:   Deb Deppeler
+//Lab Section:       001
+//
+////////////////////80 columns wide////////////////////////////////////////////
+
 package application;
 
 import java.io.File;
@@ -52,19 +66,6 @@ import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-///////////////////////////////////////////////////////////////////////////////
-//ALL STUDENTS COMPLETE THESE SECTIONS
-//Title:            Team Project
-//Files:            Main.java
-//Semester:         CS 400, Spring 2019
-//Due:              May 2, 10:00 pm
-//
-//Authors:           Evan Corden, Robin Stauffer, Ryan Hemmila
-//Emails:            corden@wisc.edu, rstauffer@isc.edu, rhemmila@wisc.edu
-//Lecturer's Name:   Deb Deppeler
-//Lab Section:       001
-//
-////////////////////80 columns wide////////////////////////////////////////////
 /**
  * Final Quiz Generator UI class
  * 
@@ -82,6 +83,9 @@ public class Main extends Application {
     Scene dashboardScene; // Global reference to the main dashboard
     Window primaryStage; // Global reference to the primary stage
 
+    /**
+     * Main application entry point
+     */
 	@Override
 	public void start(Stage primaryStage) {
       // Set title
@@ -600,6 +604,11 @@ public class Main extends Application {
       });
     }
 	
+	/**
+	 * Event handler that is fired when the user clicks the exit button
+	 * A popup is displayed that allows the user to save the current questions
+	 * or to exit without saving them
+	 */
 	private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
 		// UI Elements
 		Label saveQuestionsLabel = new Label("File name to save questions to:");
@@ -634,6 +643,12 @@ public class Main extends Application {
 		event.consume();
     };
 	
+    /**
+     * Attempts to save the current quiz database to a specified file
+     * 
+     * @param filePath is the file to save the questions to
+     * @returns whether or not the save was successful
+     */
 	private boolean saveQuestionsToFile(String filePath) {
 		if (filePath.equals("")) {
 			showWarningAlert("Please provide a file name");
@@ -651,6 +666,13 @@ public class Main extends Application {
 		return true;
 	}
 	
+	/**
+	 * Display the scene for a specific quiz question
+	 * 
+	 * @param primaryStage is the stage to display the scene
+	 * @param questionNumber is the current question number
+	 * @param quiz is the active quiz
+	 */
 	private void showQuiz(Stage primaryStage, int questionNumber, Quiz quiz) {
 		// Create border pane
 		BorderPane questionPane = new BorderPane();
@@ -770,19 +792,42 @@ public class Main extends Application {
 		
 	}
 	
+	/**
+	 * Display a warning alert
+	 * 
+	 * @param text is the alert text
+	 */
 	private void showWarningAlert(String text) {
 		showAlert(text, AlertType.WARNING);
 	}
 	
+	/**
+	 * Displays an error alert
+	 * 
+	 * @param text is the alert text
+	 */
 	private void showErrorAlert(String text) {
 		showAlert(text, AlertType.ERROR);
 	}
 	
+	/**
+	 * Shows an alert and waits for the user to respond OK
+	 * 
+	 * @param text is the alert text
+	 * @param alertType is the alert type
+	 */
 	private void showAlert(String text, AlertType alertType) {
 		Alert alert = new Alert(alertType, text);
 		alert.showAndWait().filter(response -> response == ButtonType.OK);
 	}
 	
+	/**
+	 * Display the results scene for a quiz
+	 * 
+	 * @param primaryStage is the stage to display the scene
+	 * @param quiz is the active quiz
+	 * @param questionsAnswered is the number of questions answered
+	 */
 	private void endQuiz(Stage primaryStage, Quiz quiz, int questionsAnswered) {
 		BorderPane root = new BorderPane();
 		
