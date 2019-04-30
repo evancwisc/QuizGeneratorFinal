@@ -1,3 +1,17 @@
+///////////////////////////////////////////////////////////////////////////////
+//ALL STUDENTS COMPLETE THESE SECTIONS
+//Title:            Team Project
+//Files:            UserQuiz.java
+//Semester:         CS 400, Spring 2019
+//Due:              May 2, 10:00 pm
+//
+//Authors:           Evan Corden, Robin Stauffer, Ryan Hemmila
+//Emails:            corden@wisc.edu, rstauffer@isc.edu, rhemmila@wisc.edu
+//Lecturer's Name:   Deb Deppeler
+//Lab Section:       001
+//
+////////////////////80 columns wide////////////////////////////////////////////
+
 package application;
 
 import java.util.ArrayList;
@@ -24,7 +38,7 @@ public class UserQuiz implements Quiz {
   }
   
   public float score() {
-    return this.numCorrect / this.list.size();
+    return this.numCorrect / (float)this.list.size();
   }
   
   public int getNumCorrect() {
