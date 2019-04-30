@@ -72,6 +72,7 @@ public class QuizBank implements QuizBankADT {
 							quizQuestions.add(question);
 							usedQuestions.add(question);
 							if(--extraQuestions == 0) {
+								Collections.shuffle(quizQuestions);
 								return new UserQuiz(quizQuestions);
 							}
 						}
@@ -79,6 +80,7 @@ public class QuizBank implements QuizBankADT {
 				}
 			}
 		}
+		Collections.shuffle(quizQuestions);
 		return new UserQuiz(quizQuestions);
 	}
 
