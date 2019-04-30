@@ -1,3 +1,17 @@
+///////////////////////////////////////////////////////////////////////////////
+//ALL STUDENTS COMPLETE THESE SECTIONS
+//Title:            Team Project
+//Files:            QuizBank.java
+//Semester:         CS 400, Spring 2019
+//Due:              May 2, 10:00 pm
+//
+//Authors:           Evan Corden, Robin Stauffer, Ryan Hemmila
+//Emails:            corden@wisc.edu, rstauffer@isc.edu, rhemmila@wisc.edu
+//Lecturer's Name:   Deb Deppeler
+//Lab Section:       001
+//
+////////////////////80 columns wide////////////////////////////////////////////
+
 package application;
 
 import java.io.FileNotFoundException;
@@ -131,6 +145,7 @@ public class QuizBank implements QuizBankADT {
 		Object obj = (new JSONParser()).parse(new FileReader(filename));
 		JSONObject jo = (JSONObject)obj;
 		Iterator questionsIterator = ((JSONArray)jo.get("questionArray")).iterator();
+		// Iterate through all questions
 		while(questionsIterator.hasNext()) {
 			JSONObject question = (JSONObject)questionsIterator.next();
 			String questionText = (String)question.get("questionText");
@@ -139,6 +154,7 @@ public class QuizBank implements QuizBankADT {
 			Iterator choicesIterator = ((JSONArray)question.get("choiceArray")).iterator();
 			ArrayList<String> choices = new ArrayList<String>();
 			String correctChoice = null;
+			// Iterate through all choices
 			while(choicesIterator.hasNext()) {
 				JSONObject choiceObj = (JSONObject)choicesIterator.next();
 				String isCorrect = (String)choiceObj.get("isCorrect");
@@ -148,6 +164,7 @@ public class QuizBank implements QuizBankADT {
 					correctChoice = choice;
 				}
 			}
+			// Add question to database
 			addQuestion(new Question(questionText, image, topic, choices, correctChoice));
 		}
 	}
@@ -190,7 +207,7 @@ public class QuizBank implements QuizBankADT {
 		if(!bank.containsKey(question.getTopic())) {
 			bank.put(question.getTopic(), new ArrayList<Question>());
 		}
-
+		// Add question and increment total count
 		bank.get(question.getTopic()).add(question);
 		numQuestions++;
 	}
