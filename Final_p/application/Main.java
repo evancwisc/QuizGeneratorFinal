@@ -371,7 +371,7 @@ public class Main extends Application {
   
               if (correctChoiceCombo.getValue() == null)
                 warningMessage = warningMessage + "\nCorrect answer choice";
-              else {
+              else
                 correctAns = correctChoiceCombo.getValue();
   
                 // If provided, check if image file exists in directory
@@ -405,9 +405,9 @@ public class Main extends Application {
                 }
   
                 addQuestionDialog.close();
-              }
             }
-          });
+            }
+          );
   
   
           // Create boxes and arrange

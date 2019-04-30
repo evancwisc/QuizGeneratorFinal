@@ -13,7 +13,7 @@ import javafx.scene.control.RadioButton;
   private String questionText;
   private Integer questionId;
   private String imageFile;
-  private String[] choices;
+  private ArrayList<String> choices;
   private String topic;
   private ArrayList<RadioButton> buttons;
   
@@ -21,7 +21,7 @@ import javafx.scene.control.RadioButton;
    * Construct that accepts question data and assigns it to the 
    * available fields
    */
-  public Question(String questionText, String imageFile, String topic, String[] choices, String correctChoice) {
+  public Question(String questionText, String imageFile, String topic, ArrayList<String> choices, String correctChoice) {
     this.correctChoice = correctChoice;
     this.questionText = questionText;
     this.imageFile = imageFile;
@@ -67,7 +67,7 @@ import javafx.scene.control.RadioButton;
   /**
    * @returns the question's choices
    */
-  public String[] getChoices() {
+  public ArrayList<String> getChoices() {
     return this.choices;
   }
   
