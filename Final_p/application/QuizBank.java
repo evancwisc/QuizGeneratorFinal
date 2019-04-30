@@ -8,9 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Set;
 
 import org.json.simple.JSONArray;
@@ -99,10 +97,10 @@ public class QuizBank implements QuizBankADT {
 			for(Question question : bank.get(topic)) {
 				JSONObject questionObject = new JSONObject();
 				JSONArray choicesArray = new JSONArray();
-				questionObject.put("image", question.getImageFile());
-				questionObject.put("topic", question.getTopic());
-				questionObject.put("questionText", question.getQuestionText());
 				questionObject.put("meta-data", "unused");
+				questionObject.put("questionText", question.getQuestionText());
+				questionObject.put("topic", question.getTopic());
+				questionObject.put("image", question.getImageFile());
 				for(String choice : question.getChoices()) {
 					JSONObject choiceObject = new JSONObject();
 					choiceObject.put("isCorrect", choice == question.getCorrectChoice() ? "T" : "F");
@@ -149,7 +147,6 @@ public class QuizBank implements QuizBankADT {
 				}
 			}
 			addQuestion(new Question(questionText, image, topic, choices, correctChoice));
-			numQuestions++;
 		}
 	}
 
