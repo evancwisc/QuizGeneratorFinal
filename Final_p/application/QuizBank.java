@@ -151,7 +151,6 @@ public class QuizBank implements QuizBankADT {
 			String[] choiceArray = new String[choices.size()];
 			choiceArray = choices.toArray(choiceArray);
 			addQuestion(new Question(questionText, image, topic, choiceArray, correctChoice));
-			numQuestions++;
 		}
 	}
 
