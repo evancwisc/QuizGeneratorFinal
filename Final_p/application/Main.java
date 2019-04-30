@@ -14,7 +14,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -51,6 +50,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 
 ///////////////////////////////////////////////////////////////////////////////
 //ALL STUDENTS COMPLETE THESE SECTIONS
@@ -151,8 +151,7 @@ public class Main extends Application {
             
             // Check for no selected topics
             if (selections.size() == 0) {
-              Alert alert = new Alert(AlertType.WARNING, "Please select at least one topic");
-              alert.showAndWait().filter(response -> response == ButtonType.OK);
+              showWarningAlert("Please select at least one topic");
               return;
             }
             
@@ -160,8 +159,7 @@ public class Main extends Application {
             
             // Check the user entered the number of questions
             if (numQuestionsPerQuiz.equals("")) {
-              Alert alert = new Alert(AlertType.WARNING, "Please enter a number of questions");
-              alert.showAndWait().filter(response -> response == ButtonType.OK);
+              showWarningAlert("Please enter a number of questions");
               return;
             }
   
@@ -170,16 +168,13 @@ public class Main extends Application {
             try {
               numQ = Integer.parseInt(numQuestionsPerQuiz);
             } catch (NumberFormatException e) { // user response not an integer
-              Alert alert =
-                  new Alert(AlertType.ERROR, "Number of questions must be a positive integer");
-              alert.showAndWait().filter(response -> response == ButtonType.OK);
+              showErrorAlert("Number of questions must be a positive integer");
               e.printStackTrace();
               return;
             }
   
             if (numQ <= 0) { // user response not positive
-              Alert alert = new Alert(AlertType.ERROR, "Number of questions must be > zero");
-              alert.showAndWait().filter(response -> response == ButtonType.OK);
+              showErrorAlert("Number of questions must be > zero");
               return;
             }
   
@@ -387,9 +382,7 @@ public class Main extends Application {
   
                 // Some errors must be fixed before adding the new question
                 if (!warningMessage.equals("")) { 
-                  Alert alert = new Alert(AlertType.WARNING,
-                      "Please provide the following information: " + warningMessage);
-                  alert.showAndWait().filter(response -> response == ButtonType.OK);
+                  showWarningAlert("Please provide the following information: " + warningMessage);
                   return;
                 }
   
@@ -498,8 +491,7 @@ public class Main extends Application {
               
               // Check that file name was provided
               if (filePath.getText().equals("")) {
-                Alert alert = new Alert(AlertType.WARNING, "Please provide a file name");
-                alert.showAndWait().filter(response -> response == ButtonType.OK);
+                showWarningAlert("Please provide a file name");
                 return;
   
               } else { // Attempt to load questions from file
@@ -507,16 +499,14 @@ public class Main extends Application {
                   questions.load(filePath.getText());
   
                 } catch (IOException e) {
-                  Alert alert = new Alert(AlertType.ERROR, "There was a problem with the file."
+                  showErrorAlert("There was a problem with the file."
                       + "\nPlease check that the file is in the application directory");
-                  alert.showAndWait().filter(response -> response == ButtonType.OK);
                   e.printStackTrace();
                   return;
   
                 } catch (ParseException e) {
-                  Alert alert = new Alert(AlertType.ERROR, "There was a problem parsing the file."
+                  showErrorAlert("There was a problem parsing the file."
                       + "\nPlease check that the file is in the correct format");
-                  alert.showAndWait().filter(response -> response == ButtonType.OK);
                   e.printStackTrace();
                   return;
                 }
@@ -646,20 +636,14 @@ public class Main extends Application {
 	
 	private boolean saveQuestionsToFile(String filePath) {
 		if (filePath.equals("")) {
-			Alert alert = new Alert(AlertType.WARNING, 
-					"Please provide a file name");
-			alert.showAndWait().filter(
-					response -> response == ButtonType.OK);
+			showWarningAlert("Please provide a file name");
 			return false;
 		} else {
 			try {
 				questions.save(filePath);
 
 			} catch (IOException e) {
-				Alert alert = new Alert(AlertType.ERROR, 
-						"Error writing to the file.");
-				alert.showAndWait().filter(
-						response -> response == ButtonType.OK);
+				showErrorAlert("Error writing to the file.");
 				e.printStackTrace();
 				return false;
 			}
@@ -693,8 +677,9 @@ public class Main extends Application {
 		}
 	    
 	    // Question text label
-	    Label questionText = new Label("Question: " + myQuestion.getQuestionText());
+	    Text questionText = new Text("Question: " + myQuestion.getQuestionText());
 	    questionText.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
+	    questionText.wrappingWidthProperty().bind(questionPane.widthProperty());
 	    
 	    // Topic label
 	    Label myTopic = new Label("Topic: " + myQuestion.getTopic());
@@ -719,6 +704,7 @@ public class Main extends Application {
 	    HBox bottomBox = new HBox(20);
 	    bottomBox.getChildren().addAll(resultLabel, fillerRegion, nextButton);
 	    nextButton.setVisible(false);
+	    HBox.setMargin(nextButton, new Insets(20));
 	    resultLabel.setFont(Font.font(40));
 	    
 	    // Go to the next stage
@@ -762,7 +748,7 @@ public class Main extends Application {
 							}
 							nextButton.setVisible(true);
 						} else {
-							showAlert("Please select an answer");
+							showWarningAlert("Please select an answer");
 						}
 					}
 				});
@@ -784,8 +770,16 @@ public class Main extends Application {
 		
 	}
 	
-	private void showAlert(String text) {
-		Alert alert = new Alert(AlertType.WARNING, text);
+	private void showWarningAlert(String text) {
+		showAlert(text, AlertType.WARNING);
+	}
+	
+	private void showErrorAlert(String text) {
+		showAlert(text, AlertType.ERROR);
+	}
+	
+	private void showAlert(String text, AlertType alertType) {
+		Alert alert = new Alert(alertType, text);
 		alert.showAndWait().filter(response -> response == ButtonType.OK);
 	}
 	
@@ -810,7 +804,7 @@ public class Main extends Application {
 		results.setAlignment(Pos.CENTER_LEFT);
 		
 		// Create correct questions layout
-		Label questionsCorrect = new Label("Questions Correct: " + Math.round(quiz.score() * questionsAnswered));
+		Label questionsCorrect = new Label("Questions Correct: " + quiz.getNumCorrect());
 		questionsCorrect.setFont(Font.font("verdana", FontWeight.BOLD, FontPosture.REGULAR, 20));
 		
 		Label scoreLabel = new Label("Percent Correct: " + df.format(score * 100) + "%");
